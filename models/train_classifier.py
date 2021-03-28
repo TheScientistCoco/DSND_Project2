@@ -1,24 +1,173 @@
+# import libraries
 import sys
+import numpy as np
+import pandas as pd
+from sqlalchemy import create_engine
 
+# download necessary NLTK data
+import nltk
+nltk.download(['punkt', 'wordnet', 'stopwords'])
+
+# import statements
+import re
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import stopwords
+
+# import ML modules
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report, precision_recall_fscore_support
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+
+import pickle
 
 def load_data(database_filepath):
-    pass
+    """
+    Load data from database
+    
+    Arguments:
+        database_filepath -> Path to SQLite destination database
+    Output:
+        X -> a dataframe containing features
+        Y -> a dataframe containing labels
+        category_names -> List of categories name
+    """
+    # load data from database
+    engine = create_engine('sqlite:///' + database_filepath)
+    df = pd.read_sql_table('DisasterResponseMaster', engine)
+    X = df.message
+    Y = df.iloc[:,4:]
+
+    # listing the columns
+    category_names = list(np.array(Y.columns))
+
+    return X, Y, category_names
 
 
 def tokenize(text):
-    pass
+    """
+    Tokenize the text
+    
+    Arguments:
+        text -> Text message which needs to be tokenized
+    Output:
+        clean_tokens -> List of tokens extracted from the provided text
+    """
+    # url regular expression and english stop words
+    url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    stop_words = stopwords.words("english")
+    
+    # get list of all urls using regex
+    detected_urls = re.findall(url_regex, text)
+    
+    # replace each url in text string with placeholder
+    for url in detected_urls:
+        text = text.replace(url, "urlplaceholder")
+    
+    # remove punctuation characters
+    text = re.sub(r"[^a-zA-Z0-9]", " ", text)
+    
+    # tokenize text
+    tokens = word_tokenize(text)
+    
+    # initiate lemmatizer
+    lemmatizer = WordNetLemmatizer()
+
+    # iterate through each token
+    clean_tokens = []
+    for tok in tokens:
+        if tok not in stop_words:
+            # lemmatize, normalize case, and remove leading/trailing white space
+            clean_tok = lemmatizer.lemmatize(tok).lower().strip()
+            clean_tokens.append(clean_tok)
+
+    return clean_tokens
 
 
 def build_model():
-    pass
+    """
+    Build pipeline for message classification, the parameters for the pipeline are obtained from GridSearchCV
+    
+    Output:
+        A Scikit ML Pipeline that process text messages and apply a classifier.
+        
+    """
+    pipeline = Pipeline([
+            ('vect', CountVectorizer(tokenizer=tokenize)),
+            ('tfidf', TfidfTransformer()),
+            ('clf', MultiOutputClassifier(RandomForestClassifier()))
+        ])
+    
+    parameters = {
+    'clf__estimator__n_estimators': [50, 100],
+    'clf__estimator__min_samples_split': [2, 3],
+    }
 
+    cv = GridSearchCV(pipeline, param_grid = parameters, n_jobs = 4, verbose = 2)
+
+    return cv
+
+def get_scores(y_test, y_pred):
+    """
+    Function to calculate the F1 score, precision and recall for each category of the data
+    This is a performance metric of my own creation.
+        
+    Arguments:
+        y_test -> Actual labels on test samples
+        y_pred -> Predicted labels on test samples
+        
+    Output:
+        scores -> Pandas frame with the F1 score, precision and recall on each category
+    """
+    scores = pd.DataFrame(columns=['category', 'f1_score', 'precision', 'recall'])
+    for i, cat in enumerate(y_test.columns):
+        precision, recall, f1_score, support = precision_recall_fscore_support(y_test[cat], y_pred[:,i], average='weighted')
+        scores.set_value(i + 1, 'category', cat)
+        scores.set_value(i + 1, 'f1_score', f1_score)
+        scores.set_value(i + 1, 'precision', precision)
+        scores.set_value(i + 1, 'recall', recall)
+    print('Average f1 score:', scores['f1_score'].mean())
+    print('Average precision:', scores['precision'].mean())
+    print('Average recall:', scores['recall'].mean())
+    return scores
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
-
+    """
+    Evaluate the classificaiton model
+    
+    This function applies a ML pipeline to a test set and prints out the model performance (accuracy, F1 score, precision and recall)
+    
+    Arguments:
+        model -> A valid scikit ML Pipeline
+        X_test -> Test features
+        Y_test -> Test labels
+        category_names -> label names (multi-output)
+    """
+    Y_pred = model.predict(X_test)
+    # print the overall accuracy of the model
+    accuracy = (Y_pred == Y_test).values.mean()
+    print ('Model Overall Accuracy: {}'.format(accuracy))
+    
+    # print the F1 score, precision and recall for each category
+    print (get_scores(Y_test, Y_pred))
 
 def save_model(model, model_filepath):
-    pass
+    """
+    Save the classification model
+    
+    This function saves trained model as Pickle file, to be loaded later.
+    
+    Arguments:
+        model -> GridSearchCV or Scikit Pipeline object
+        pickle_filepath -> destination path to save .pkl file
+    
+    """
+    with open(model_filepath, 'wb') as file:
+        pickle.dump(model, file)
 
 
 def main():
