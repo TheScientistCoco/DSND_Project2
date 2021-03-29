@@ -1,5 +1,32 @@
 # Disaster Response Pipeline Project
 
+Yu Tao 2021/03/28
+
+Udacity Data Scientist Nanodegree Project 2: Disaster Response Pipelines
+
+### Table of Contents
+
+- 1. Installation
+- 2. Project Motivation
+- 3. File Descriptions
+- 4. Instructions
+- 5. Licensing, Authors, Acknowledgements
+
+### Installation:
+The program is running on Python 3, the following packages are needed: numpy, pandas, matplotlib, sqlalchemy, nltk, re, pickle and sklearn.
+
+### Project Motivation:
+In the Udacity Data Scientist Nanodegree course, I've learned and built many data engineering skills. In this project, I apply these skills to analyze disaster data from Figure Eight to build a model for an API that classifies disaster messages.
+
+### File Descriptions:
+In the data folder, disaster_categories.csv and disaster_messages.csv are the original disaster data from Figure Eight, process_data.py includes code to clean the data.
+
+In the model folder, train_classifier.py includes the code to deploy a ML classification model and train on the cleaned data.
+
+In the app folder, run.py include the code to launch a web app to visualize the classification on the data.
+
+ETL Pipeline Preparation.ipynb and ML Pipeline Preparation.ipynb are the jupyter notebooks used in the preparation step of this project.
+
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
 
@@ -12,3 +39,7 @@
     `python run.py`
 
 3. Go to http://0.0.0.0:3001/
+
+### Licensing, Authors, Acknowledgements
+This app was completed as part of the Udacity Data Scientist Nanodegree.
+The disaster response data used to train the classification model was provide by Figure Eight.

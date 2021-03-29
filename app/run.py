@@ -26,11 +26,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///../data/DisasterResponse.db')
+df = pd.read_sql_table('DisasterResponseMaster', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+model = joblib.load("../models/classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -40,12 +40,23 @@ def index():
     
     # extract data needed for visuals
     # TODO: Below is an example - modify to extract data for your own visuals
+    # data for graph 1
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
+    
+    # data for graph 2
+    category_counts = (df.iloc[:,4:] != 0).sum().values
+    category_names = df.iloc[:,4:].columns
+    
+    # data for graph 3
+    dir_cat = df[df.genre == 'direct']
+    dir_cat_counts = (dir_cat != 0).sum().values
+    dir_cat_names = dir_cat.columns
     
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
+        # GRAPH 1 - genre graph
         {
             'data': [
                 Bar(
@@ -61,6 +72,46 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        # GRAPH 2 - category graph    
+        {
+            'data': [
+                Bar(
+                    x=dir_cat_names,
+                    y=dir_cat_counts
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Direct Message Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category",
+                    'tickangle': 35
+                }
+            }
+        },
+        # GRAPH 3 -  graph
+        {
+            'data': [
+                Bar(
+                    x=category_names,
+                    y=category_counts
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Message Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category",
+                    'tickangle': 35
                 }
             }
         }
