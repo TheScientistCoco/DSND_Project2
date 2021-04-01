@@ -19,6 +19,22 @@ The program is running on Python 3, the following packages are needed: numpy, pa
 In the Udacity Data Scientist Nanodegree course, I've learned and built many data engineering skills. In this project, I apply these skills to analyze disaster data from Figure Eight to build a model for an API that classifies disaster messages. The goal is to build a machine learning model to identify if certain messages are related to disaster or not, if so, we can label these messages into 36 categories. This would be of great help for some disaster relief agencies. After building and training such a model, a web service which can label new messages from users' input will be launched, which helps people to get alerted during natural disasters. 
 
 ### File Descriptions:
+The file structure is as follows:
+	app
+	|- template
+	| |- master.html # main page of web app
+	| |- go.html # classification result page of web app
+	|- run.py # Flask file that runs app
+	data
+	|- disaster_categories.csv # data to process
+	|- disaster_messages.csv # data to process
+	|- process_data.py
+	|- InsertDatabaseName.db # database to save clean data to
+    models
+	|- train_classifier.py
+	|- classifier.pkl # saved model
+	README.md
+
 In the data folder, disaster_categories.csv and disaster_messages.csv are the original disaster data from Figure Eight, process_data.py includes code to clean the data.
 
 In the model folder, train_classifier.py includes the code to deploy a ML classification model and train on the cleaned data.
