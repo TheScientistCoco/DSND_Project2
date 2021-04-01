@@ -16,7 +16,7 @@ Udacity Data Scientist Nanodegree Project 2: Disaster Response Pipelines
 The program is running on Python 3, the following packages are needed: numpy, pandas, matplotlib, sqlalchemy, nltk, re, pickle and sklearn.
 
 ### Project Motivation:
-In the Udacity Data Scientist Nanodegree course, I've learned and built many data engineering skills. In this project, I apply these skills to analyze disaster data from Figure Eight to build a model for an API that classifies disaster messages.
+In the Udacity Data Scientist Nanodegree course, I've learned and built many data engineering skills. In this project, I apply these skills to analyze disaster data from Figure Eight to build a model for an API that classifies disaster messages. The goal is to build a machine learning model to identify if certain messages are related to disaster or not, if so, we can label these messages into 36 categories. This would be of great help for some disaster relief agencies. After building and training such a model, a web service which can label new messages from users' input will be launched, which helps people to get alerted during natural disasters. 
 
 ### File Descriptions:
 In the data folder, disaster_categories.csv and disaster_messages.csv are the original disaster data from Figure Eight, process_data.py includes code to clean the data.
