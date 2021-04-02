@@ -25,6 +25,9 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 import pickle
 
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 def load_data(database_filepath):
     """
     Load data from database
@@ -111,29 +114,6 @@ def build_model():
 
     return cv
 
-def get_scores(y_test, y_pred):
-    """
-    Function to calculate the F1 score, precision and recall for each category of the data
-    This is a performance metric of my own creation.
-        
-    Arguments:
-        y_test -> Actual labels on test samples
-        y_pred -> Predicted labels on test samples
-        
-    Output:
-        scores -> Pandas frame with the F1 score, precision and recall on each category
-    """
-    scores = pd.DataFrame(columns=['category', 'f1_score', 'precision', 'recall'])
-    for i, cat in enumerate(y_test.columns):
-        precision, recall, f1_score, support = precision_recall_fscore_support(y_test[cat], y_pred[:,i], average='weighted')
-        scores.set_value(i + 1, 'category', cat)
-        scores.set_value(i + 1, 'f1_score', f1_score)
-        scores.set_value(i + 1, 'precision', precision)
-        scores.set_value(i + 1, 'recall', recall)
-    print('Average f1 score:', scores['f1_score'].mean())
-    print('Average precision:', scores['precision'].mean())
-    print('Average recall:', scores['recall'].mean())
-    return scores
 
 def evaluate_model(model, X_test, Y_test, category_names):
     """
@@ -153,7 +133,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
     print ('Model Overall Accuracy: {}'.format(accuracy))
     
     # print the F1 score, precision and recall for each category
-    print (get_scores(Y_test, Y_pred))
+    print (classification_report(Y_test.values, Y_pred, target_names = category_names))
 
 def save_model(model, model_filepath):
     """
