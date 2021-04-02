@@ -57,6 +57,8 @@ In the app folder, run.py include the code to launch a web app to visualize the 
 
 ETL Pipeline Preparation.ipynb and ML Pipeline Preparation.ipynb are the jupyter notebooks used in the preparation step of this project.
 
+Three png figures showing the visualization on the web are included as well.
+
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
 
